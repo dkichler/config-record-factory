@@ -193,7 +193,7 @@ class ConfigRecordFactoryTest {
         assertNotNull(recordConfig)
         assertNotNull(recordConfig.valueObject)
         assertNull(recordConfig.valueObject.optionalValue)
-        assertNull(recordConfig.valueObject.Default)
+        assertTrue(recordConfig.valueObject.Default.isEmpty)
         assertEquals("notNull", recordConfig.valueObject.mandatoryValue)
     }
 
@@ -279,9 +279,34 @@ class ConfigRecordFactoryTest {
 
     @Test
     def testOptionalRecordConfig(): Unit = {
-        val recordConfig = ConfigRecordFactory.create(loadConfig().getConfig("optionals"), classOf[OptionalRecordConfig])
-        assertTrue(recordConfig.optionalRecord.isPresent)
-        assertEquals("abcd", recordConfig.optionalRecord.get().abcd)
+        val recordConfig = ConfigRecordFactory.create(loadConfig().getConfig("optionals"), classOf[OptionalsConfig])
+        assertTrue(recordConfig.empty.isEmpty)
+        assertTrue(recordConfig.ofInt.isPresent)
+        assertEquals(1, recordConfig.ofInt.get)
+        assertTrue(recordConfig.ofString.isPresent)
+        assertEquals("a", recordConfig.ofString.get)
+        assertTrue(recordConfig.ofDouble.isPresent)
+        assertEquals(3.14, recordConfig.ofDouble.get, 1e-6)
+        assertTrue(recordConfig.ofLong.isPresent)
+        assertEquals(32L, recordConfig.ofLong.get)
+        assertFalse(recordConfig.ofNull.isPresent)
+        assertTrue(recordConfig.ofBoolean.isPresent)
+        assertEquals(true, recordConfig.ofBoolean.get)
+        assertTrue(recordConfig.ofObject.isPresent)
+        assertTrue(recordConfig.ofObject.get.isInstanceOf[java.util.Map[_,_]])
+        assertTrue(recordConfig.ofConfig.isPresent)
+        assertEquals(3, recordConfig.ofConfig.get.getInt("intVal"))
+        assertTrue(recordConfig.ofConfigObject.isPresent)
+        assertEquals(3, recordConfig.ofConfigObject.get.toConfig.getInt("intVal"))
+        assertTrue(recordConfig.ofConfigValue.isPresent)
+        assertEquals(intValue(1), recordConfig.ofConfigValue.get)
+        assertTrue(recordConfig.ofDuration.isPresent)
+        assertEquals(Duration.ofMillis(1), recordConfig.ofDuration.get)
+        assertTrue(recordConfig.ofMemorySize.isPresent)
+        assertEquals(ConfigMemorySize.ofBytes(1024), recordConfig.ofMemorySize.get)
+        assertTrue(recordConfig.ofStringRecord.isPresent)
+        assertEquals("testAbcdOne", recordConfig.ofStringRecord.get.abcd)
+        assertEquals("testYesOne", recordConfig.ofStringRecord.get.yes)
     }
 
     @Test

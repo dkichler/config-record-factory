@@ -75,7 +75,10 @@ public class ConfigRecordImpl {
                 Parameter param = parameters[i];
                 var key = fieldNameToKey.get(param.getName());
                 // null indicates key was not found but is optional, set as null
-                args[i] = key == null ? null : getConfigValue(config, param);
+
+                args[i] = key == null ?
+                        (param.getType() == Optional.class ? Optional.empty() : null)
+                        : getConfigValue(config, param);
             }
             return constructor.newInstance(args);
         } catch (ConfigException e) {

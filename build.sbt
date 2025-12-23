@@ -28,6 +28,7 @@ ThisBuild / publishMavenStyle       := true
 lazy val root = (project in file("."))
   .enablePlugins(DynVerPlugin)
   .enablePlugins(SbtOsgi)
+  .enablePlugins(JacocoPlugin)
   .settings(osgiSettings)
   .settings(
     name                          := "config-record-factory",
@@ -35,7 +36,8 @@ lazy val root = (project in file("."))
     Compile / crossPaths          := false,
     libraryDependencies           += "org.scala-lang" % "scala-library" % (ThisBuild / scalaVersion).value % Test,
     libraryDependencies           += "com.typesafe" % "config" % "1.4.5",
-    libraryDependencies           += "com.novocode" % "junit-interface" % "0.11" % Test,
+    libraryDependencies           += "com.github.sbt" % "junit-interface" % "0.13.3" % Test,
+
 
     OsgiKeys.exportPackage        := Seq("io.github.dkichler.config", "io.github.dkichler.config.impl"),
     Compile / packageBin / packageOptions  +=
