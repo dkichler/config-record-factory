@@ -1,10 +1,24 @@
 # config-record-factory
 
-<a href="">![badge](https://gist.githubusercontent.com/dkichler/f4d7b3bb6eda2e6298814b449dec0bbb/raw/config-record-factory-coverage.svg)</a>
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.dkichler/config-record-factory/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.dkichler/config-record-factory)
+[![Build Status](https://github.com/lightbend/config/actions/workflows/ci.yml/badge.svg)](https://github.com/dkichler/config-record-factory/actions/workflows/ci.yml)
+<a href="">![Coverage](https://gist.githubusercontent.com/dkichler/f4d7b3bb6eda2e6298814b449dec0bbb/raw/config-record-factory-coverage.svg)</a>
 
-An extension for [Lightbend Config](https://github.com/lightbend/config) to support creating Java Records from `Config` objects.
+An extension to [Lightbend Config](https://github.com/lightbend/config) for support creating Java Records from `Config` objects.
 
 ## Usage
+
+Add the dependency to a Maven (or favourite alternative) build. Latest version on [Maven Central](https://search.maven.org/artifact/io.github.dkichler/config-record-factory).
+
+```xml
+<dependency>
+    <groupId>io.github.dkichler</groupId>
+    <artifactId>config-record-factory</artifactId>
+    <version>0.1.0</version>
+</dependency>
+```
+
+### Creating Records
 
 Define your configuration as a Java `record`:
 
@@ -40,7 +54,7 @@ my-app {
 }
 ```
 
-## Supported Types
+### Supported Types
 
 Below is a comprehensive example showing all supported field types.
 
@@ -115,3 +129,7 @@ public record ComprehensiveConfig(
 ```
 
 For more detailed examples, please refer to the test cases and related record classes in the `src/test` directory.
+
+## Rationale
+
+Why here as an extension and not part of the core library?  Mostly because Lightbend Config still supports Java 8 as a lower bound, and Java records did not become a core feature until Java 16.  This extension supports 16 as a lower bound and was inspired by [this issue](https://github.com/lightbend/config/issues/769) on the core library, and by the fact that I have already been using most of the implementation code in Akka SDK applications.  

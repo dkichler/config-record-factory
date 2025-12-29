@@ -1,11 +1,9 @@
 import sbt.ThisBuild
 
 ThisBuild / organization            := "io.github.dkichler"
-ThisBuild / scalaVersion            := "2.13.18"
-
-ThisBuild / scmInfo                 := Option(
-  ScmInfo(url("https://github.com/dkichler/config-record-factory"), "scm:git@github.com:dkichler/config-record-factory.git")
-)
+ThisBuild / description             := "Extension for Lightbend Config to support creating Java Records from Config objects."
+ThisBuild / licenses                := List("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0"))
+ThisBuild / homepage                := Option(url("https://github.com/dkichler/config-record-factory"))
 ThisBuild / developers              := List(
   Developer(
     id    = "dkichler",
@@ -14,11 +12,11 @@ ThisBuild / developers              := List(
     url   = url("https://github.com/dkichler")
   )
 )
-ThisBuild / description             := "Extension for Lightbend Config to support creating Java Records from Config objects."
-ThisBuild / licenses                := List("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0"))
-ThisBuild / homepage                := Option(url("https://github.com/dkichler/config-record-factory"))
-ThisBuild / pomIncludeRepository    := { _ => false }
-ThisBuild / publishMavenStyle       := true
+ThisBuild / scmInfo                 := Option(
+  ScmInfo(url("https://github.com/dkichler/config-record-factory"), "scm:git@github.com:dkichler/config-record-factory.git")
+)
+
+ThisBuild / scalaVersion            := "2.13.18"
 
 lazy val root = (project in file("."))
   .enablePlugins(DynVerPlugin)
@@ -31,14 +29,12 @@ lazy val root = (project in file("."))
     Test / scalacOptions          ++= List("-unchecked", "-deprecation", "-feature"),
     Compile / javacOptions        ++= List("--release", "16"),
     Test / javacOptions           ++= List("--release", "16"),
-    Compile / autoScalaLibrary    := false,
-    Compile / crossPaths          := false,
+    autoScalaLibrary              := false,
+    crossPaths                    := false,
     libraryDependencies           += "org.scala-lang" % "scala-library" % (ThisBuild / scalaVersion).value % Test,
     libraryDependencies           += "com.typesafe" % "config" % "1.4.5",
     libraryDependencies           += "com.github.sbt" % "junit-interface" % "0.13.3" % Test,
-    jacocoReportSettings          := JacocoReportSettings()
-      .withFormats(JacocoReportFormats.HTML, JacocoReportFormats.CSV),
-
+    pomIncludeRepository          := { _ => false },
     OsgiKeys.exportPackage        := Seq("io.github.dkichler.config", "io.github.dkichler.config.impl"),
     Compile / packageBin / packageOptions  +=
       Package.ManifestAttributes("Automatic-Module-Name" -> "io.github.dkichler.config" ),
