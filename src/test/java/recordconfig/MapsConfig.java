@@ -1,8 +1,10 @@
 package recordconfig;
 
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigList;
 import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigValue;
+import recordconfig.EnumsConfig.Solution;
 
 import java.time.Duration;
 import java.util.List;
@@ -20,6 +22,8 @@ public record MapsConfig(
     Map<String, Config> configMap,
     Map<String, ConfigValue> configValueMap,
     Map<String, List<Object>> listMap,
-    Map<String, SimpleBean> beanMap
+    Map<String, SimpleBean> beanMap,
+    Map<String, ConfigList> configListMap,
+    Map<String, Solution> enumMap
 ) {
 }

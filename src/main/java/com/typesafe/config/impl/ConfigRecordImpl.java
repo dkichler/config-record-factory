@@ -33,6 +33,8 @@ import java.util.stream.Collectors;
 
 public class ConfigRecordImpl {
 
+    private ConfigRecordImpl() {}
+
     public static <T extends Record> T createInternal(Config config, Class<T> recordClass) {
         if (((SimpleConfig) config).root().resolveStatus() != ResolveStatus.RESOLVED)
             throw new ConfigException.NotResolved(
@@ -161,9 +163,9 @@ public class ConfigRecordImpl {
         } else if (type == List.class) {
             return getListValue(config, key, (ParameterizedType) param.getParameterizedType());
         } else if (type == Set.class) {
-            return getSetValue(config, key, param);
+            return getSetValue(config, key, (ParameterizedType) param.getParameterizedType());
         } else if (type == Map.class) {
-            return getMapValue(config, key, param);
+            return getMapValue(config, key, (ParameterizedType) param.getParameterizedType());
         } else if (type == Object.class) {
             return config.getAnyRef(key);
         } else if (type == Config.class) {
@@ -213,7 +215,16 @@ public class ConfigRecordImpl {
                 ParameterizedType paramType = (ParameterizedType) genericType;
                 Type[] typeArgs = paramType.getActualTypeArguments();
                 if (typeArgs.length > 0) {
-                    Class<?> elementType = (Class<?>) typeArgs[0];
+                    Class<?> elementType;
+                    if (typeArgs[0] instanceof ParameterizedType) {
+                        try {
+                            elementType = Class.forName(((ParameterizedType) typeArgs[0]).getRawType().getTypeName());
+                        } catch (ClassNotFoundException e) {
+                            throw new ConfigRecordException.BadRecord("Unexpected parameterized type exception for field " + key + ": " + genericType, e);
+                        }
+                    } else {
+                        elementType = (Class<?>) typeArgs[0];
+                    }
 
                     if (elementType == String.class) {
                         return Optional.of(config.getString(key));
@@ -229,12 +240,6 @@ public class ConfigRecordImpl {
                         return Optional.of(config.getDuration(key));
                     } else if (elementType == ConfigMemorySize.class) {
                         return Optional.of(config.getMemorySize(key));
-                    } else if (elementType == List.class) {
-                        return Optional.of(getListValue(config, key, (ParameterizedType) param.getParameterizedType()));
-                    } else if (elementType == Set.class) {
-                        return Optional.of(getSetValue(config, key, param));
-                    } else if (elementType == Map.class) {
-                        return Optional.of(getMapValue(config, key, param));
                     } else if (elementType == Object.class) {
                         return Optional.of(config.getAnyRef(key));
                     } else if (elementType == Config.class) {
@@ -245,15 +250,22 @@ public class ConfigRecordImpl {
                         return Optional.of(config.getValue(key));
                     } else if (elementType == ConfigList.class) {
                         return Optional.of(config.getList(key));
+                    } else if (elementType == List.class) {
+                        return Optional.of(getListValue(config, key, (ParameterizedType) typeArgs[0]));
+                    } else if (elementType == Set.class) {
+                        return Optional.of(getSetValue(config, key, (ParameterizedType) typeArgs[0]));
+                    } else if (elementType == Map.class) {
+                        return Optional.of(getMapValue(config, key, (ParameterizedType) typeArgs[0]));
                     } else if (elementType.isEnum()) {
                         @SuppressWarnings("unchecked")
                         Enum enumValue = config.getEnum((Class<Enum>) elementType, key);
                         return Optional.of(enumValue);
                     } else if (hasAtLeastOneBeanProperty(elementType)) {
                         return Optional.of(ConfigBeanImpl.createInternal(config.getConfig(key), elementType));
-                    }else if (Record.class.isAssignableFrom(elementType)) {
+                    } else if (Record.class.isAssignableFrom(elementType)) {
                         return Optional.of(createInternal(config.getConfig(key), (Class<? extends Record>) elementType));
                     }
+
                 }
             }
             throw new ConfigRecordException.BadRecord("Unsupported optional type for field " + key + ": " + genericType);
@@ -263,72 +275,60 @@ public class ConfigRecordImpl {
     }
 
     private static List<?> getListValue(Config config, String key, ParameterizedType type) {
-        if (type instanceof ParameterizedType) {
-            ParameterizedType paramType = (ParameterizedType) type;
-            Type[] typeArgs = paramType.getActualTypeArguments();
-            if (typeArgs.length > 0) {
-                Class<?> elementType = (Class<?>) typeArgs[0];
-
-                if (elementType == String.class) {
-                    return config.getStringList(key);
-                } else if (elementType == Integer.class) {
-                    return config.getIntList(key);
-                } else if (elementType == Long.class) {
-                    return config.getLongList(key);
-                } else if (elementType == Double.class) {
-                    return config.getDoubleList(key);
-                } else if (elementType == Boolean.class) {
-                    return config.getBooleanList(key);
-                } else if (elementType == Duration.class) {
-                    return config.getDurationList(key);
-                } else if (elementType == ConfigMemorySize.class) {
-                    return config.getMemorySizeList(key);
-                } else if (elementType == Object.class) {
-                    return config.getAnyRefList(key);
-                } else if (elementType == Config.class) {
-                    return config.getConfigList(key);
-                } else if (elementType == ConfigObject.class) {
-                    return config.getObjectList(key);
-                } else if (elementType == ConfigValue.class) {
-                    return config.getList(key);
-                } else if (((Class<?>) elementType).isEnum()) {
-                    @SuppressWarnings("unchecked")
-                    List<Enum> enumValues = config.getEnumList((Class<Enum>) elementType, key);
-                    return enumValues;
-                } else if (hasAtLeastOneBeanProperty((Class<?>) elementType)) {
-                    List<Object> beanList = new ArrayList<Object>();
-                    List<? extends Config> configList = config.getConfigList(key);
-                    for (Config listMember : configList) {
-                        beanList.add(ConfigBeanImpl.createInternal(listMember, (Class<?>) elementType));
-                    }
-                    return beanList;
-                }else if (Record.class.isAssignableFrom(elementType)) {
-                    List<? extends Config> configList = config.getConfigList(key);
-                    List<Object> result = new ArrayList<>();
-                    for (Config itemConfig : configList) {
-                        result.add(createInternal(itemConfig, (Class<? extends Record>) elementType));
-                    }
-                    return result;
+        Type[] typeArgs = type.getActualTypeArguments();
+        if (typeArgs.length > 0) {
+            Class<?> elementType = (Class<?>) typeArgs[0];
+            if (elementType == String.class) {
+                return config.getStringList(key);
+            } else if (elementType == Integer.class) {
+                return config.getIntList(key);
+            } else if (elementType == Long.class) {
+                return config.getLongList(key);
+            } else if (elementType == Double.class) {
+                return config.getDoubleList(key);
+            } else if (elementType == Boolean.class) {
+                return config.getBooleanList(key);
+            } else if (elementType == Duration.class) {
+                return config.getDurationList(key);
+            } else if (elementType == ConfigMemorySize.class) {
+                return config.getMemorySizeList(key);
+            } else if (elementType == Object.class) {
+                return config.getAnyRefList(key);
+            } else if (elementType == Config.class) {
+                return config.getConfigList(key);
+            } else if (elementType == ConfigObject.class) {
+                return config.getObjectList(key);
+            } else if (elementType == ConfigValue.class) {
+                return config.getList(key);
+            } else if (((Class<?>) elementType).isEnum()) {
+                @SuppressWarnings("unchecked")
+                List<Enum> enumValues = config.getEnumList((Class<Enum>) elementType, key);
+                return enumValues;
+            } else if (hasAtLeastOneBeanProperty((Class<?>) elementType)) {
+                List<Object> beanList = new ArrayList<Object>();
+                List<? extends Config> configList = config.getConfigList(key);
+                for (Config listMember : configList) {
+                    beanList.add(ConfigBeanImpl.createInternal(listMember, (Class<?>) elementType));
                 }
+                return beanList;
+            } else if (Record.class.isAssignableFrom(elementType)) {
+                List<? extends Config> configList = config.getConfigList(key);
+                List<Object> result = new ArrayList<>();
+                for (Config itemConfig : configList) {
+                    result.add(createInternal(itemConfig, (Class<? extends Record>) elementType));
+                }
+                return result;
             }
         }
         throw new ConfigRecordException.BadRecord("Unsupported list element type for field " + key + ": " + type, null);
     }
 
-    private static Set<?> getSetValue(Config config, String key, Parameter param) {
-        List<?> list = getListValue(config, key, (ParameterizedType) param.getParameterizedType());
+    private static Set<?> getSetValue(Config config, String key, ParameterizedType param) {
+        List<?> list = getListValue(config, key,param);
         return new HashSet<>(list);
     }
 
-    private static Map<String, ?> getMapValue(Config config, String key, Parameter param) {
-        Type genericType = param.getParameterizedType();
-
-        if (!(genericType instanceof ParameterizedType)) {
-            // No generic type info, return empty map or throw
-            throw new IllegalArgumentException("Map must have generic type parameters");
-        }
-
-        ParameterizedType paramType = (ParameterizedType) genericType;
+    private static Map<String, ?> getMapValue(Config config, String key, ParameterizedType paramType) {
         Type[] typeArgs = paramType.getActualTypeArguments();
 
         if (typeArgs.length != 2) {
@@ -398,8 +398,6 @@ public class ConfigRecordImpl {
                 return ConfigBeanImpl.createInternal(config.getConfig(key), valueClass);
             } else if (valueClass == Object.class) {
                 return config.getAnyRef(key);
-            } else {
-                throw new ConfigRecordException.BadRecord("Unsupported map value type: " + valueClass);
             }
         } else if (valueType instanceof ParameterizedType) {
             // Handle nested generics like Map<String, List<SomeRecord>>

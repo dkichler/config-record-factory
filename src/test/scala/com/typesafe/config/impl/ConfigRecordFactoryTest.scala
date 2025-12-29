@@ -41,13 +41,26 @@ class ConfigRecordFactoryTest {
             ConfigRecordFactory.create(config, classOf[ValidationRecordConfig])
         }
 
-        val expecteds = Seq(Missing("numbers", 96, "recordconfig.NumbersConfig"),
-            Missing("propNotListedInConfig", 96, "string"),
-            WrongType("shouldBeInt", 97, "number", "boolean"),
-            WrongType("should-be-boolean", 98, "boolean", "number"),
-            WrongType("should-be-list", 99, "list", "string"))
+        val expecteds = Seq(Missing("numbers", 101, "recordconfig.NumbersConfig"),
+            Missing("propNotListedInConfig", 101, "string"),
+            WrongType("shouldBeInt", 102, "number", "boolean"),
+            WrongType("should-be-boolean", 103, "boolean", "number"),
+            WrongType("should-be-list", 104, "list", "string"))
 
         checkValidationException(e, expecteds)
+    }
+
+    @Test
+    def testUnresolvedConfig(): Unit = {
+        val e = intercept[ConfigException.NotResolved] {
+            val conf =
+                """
+                  |abcd = ${unresolved}
+                  |yes = "yes"
+                  |""".stripMargin
+            ConfigRecordFactory.create(parseConfig(conf), classOf[StringsConfig])
+        }
+        assertTrue("unresolved substitution error", e.getMessage.contains("need to Config#resolve() a config before using it"))
     }
 
     @Test
@@ -307,6 +320,16 @@ class ConfigRecordFactoryTest {
         assertTrue(recordConfig.ofStringRecord.isPresent)
         assertEquals("testAbcdOne", recordConfig.ofStringRecord.get.abcd)
         assertEquals("testYesOne", recordConfig.ofStringRecord.get.yes)
+        assertTrue(recordConfig.ofStringList.isPresent)
+        assertEquals(List("a", "b").asJava, recordConfig.ofStringList.get)
+        assertTrue(recordConfig.ofStringSet.isPresent)
+        assertEquals(Set("a", "b").asJava, recordConfig.ofStringSet.get)
+        assertTrue(recordConfig.ofStringMap.isPresent)
+        assertEquals(Map("a" -> "x", "b" -> "y").asJava, recordConfig.ofStringMap.get)
+        assertTrue(recordConfig.ofEnum.isPresent)
+        assertEquals(Problem.P1, recordConfig.ofEnum.get)
+        assertTrue(recordConfig.ofConfigList.isPresent)
+        assertEquals(2, recordConfig.ofConfigList.get.size)
     }
 
     @Test
@@ -324,6 +347,8 @@ class ConfigRecordFactoryTest {
         assertEquals(stringValue("value1"), recordConfig.configValueMap.get("key1"))
         assertEquals(List(1, 2, 3).asJava, recordConfig.listMap.get("key1"))
         assertEquals("hello", recordConfig.beanMap.get("bean1").getString)
+        assertEquals(2, recordConfig.configListMap.get("key1").size)
+        assertEquals(EnumsConfig.Solution.S1, recordConfig.enumMap.get("key1"))
     }
 
     @Test
@@ -340,6 +365,15 @@ class ConfigRecordFactoryTest {
             ConfigRecordFactory.create(loadConfig(), classOf[UnsupportedMapValueConfig])
         }
         assertTrue(e.getMessage.contains("Unsupported map value type"))
+    }
+
+    @Test
+    def testUnsupportedOptionalValue(): Unit = {
+        val e = intercept[BadRecord] {
+            ConfigRecordFactory.create(loadConfig(), classOf[UnsupportedOptionalValueConfig])
+        }
+        assertTrue(e.getMessage.contains("Unsupported optional type"))
+        assertTrue(e.getMessage.contains("unsupportedOptionalValue"))
     }
 
     private def loadConfig(): Config = {
