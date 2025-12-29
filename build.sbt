@@ -27,10 +27,10 @@ lazy val root = (project in file("."))
   .settings(osgiSettings)
   .settings(
     name                          := "config-record-factory",
-    Compile / scalacOptions       := List("-unchecked", "-deprecation", "-feature"),
-    Test / scalacOptions          := List("-unchecked", "-deprecation", "-feature"),
-    Compile / javacOptions        := List("--release", "17"),
-    Test / javacOptions           := List("--release", "17"),
+    Compile / scalacOptions       ++= List("-unchecked", "-deprecation", "-feature"),
+    Test / scalacOptions          ++= List("-unchecked", "-deprecation", "-feature"),
+    Compile / javacOptions        ++= List("--release", "16"),
+    Test / javacOptions           ++= List("--release", "16"),
     Compile / autoScalaLibrary    := false,
     Compile / crossPaths          := false,
     libraryDependencies           += "org.scala-lang" % "scala-library" % (ThisBuild / scalaVersion).value % Test,
