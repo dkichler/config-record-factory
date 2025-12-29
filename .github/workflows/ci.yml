@@ -30,4 +30,29 @@ jobs:
         uses: sbt/setup-sbt@v1
       - name: Build and test
         shell: bash
-        run: sbt -v jacoco
+        run: sbt -v -no-colors jacoco 2>&1 > sbt-output.log
+      - name: Report Coverage
+        id: jacoco
+        run: |
+          COVERAGE="$(grep -e '\[info\] Instructions: .*' sbt-output.log |& awk -F'[:%]' '{ print $2 }' |& sed 's/^[[:space:]]*//')"
+          echo "Instruction coverage of $COVERAGE"
+          if [ -z "$COVERAGE" ]; then
+            COVERAGE_PERCENT="NA"
+            COVERAGE=0
+          else
+            COVERAGE_PERCENT="$COVERAGE"%
+          fi
+          echo "coverage_raw=$COVERAGE" >> $GITHUB_OUTPUT
+          echo "coverage_percent=$COVERAGE_PERCENT" >> $GITHUB_OUTPUT
+      - name: Create Coverage Badge
+        if: github.ref == 'refs/heads/main'
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.COVERAGE_GIST_SECRET }}
+          gistID: f4d7b3bb6eda2e6298814b449dec0bbb
+          filename: config-record-factory-coverage.svg
+          label: coverage
+          message: ${{ steps.jacoco.outputs.coverage_percent }}
+          valColorRange: ${{ steps.jacoco.outputs.coverage_raw }}
+          maxColorRange: 95
+          minColorRange: 50

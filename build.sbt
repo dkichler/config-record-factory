@@ -36,7 +36,8 @@ lazy val root = (project in file("."))
     libraryDependencies           += "org.scala-lang" % "scala-library" % (ThisBuild / scalaVersion).value % Test,
     libraryDependencies           += "com.typesafe" % "config" % "1.4.5",
     libraryDependencies           += "com.github.sbt" % "junit-interface" % "0.13.3" % Test,
-
+    jacocoReportSettings          := JacocoReportSettings()
+      .withFormats(JacocoReportFormats.HTML, JacocoReportFormats.CSV),
 
     OsgiKeys.exportPackage        := Seq("io.github.dkichler.config", "io.github.dkichler.config.impl"),
     Compile / packageBin / packageOptions  +=

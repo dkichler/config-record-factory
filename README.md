@@ -1,5 +1,7 @@
 # config-record-factory
 
+<a href="">![badge](https://gist.githubusercontent.com/dkichler/f4d7b3bb6eda2e6298814b449dec0bbb/raw/config-record-factory-coverage.svg)</a>
+
 An extension for [Lightbend Config](https://github.com/lightbend/config) to support creating Java Records from `Config` objects.
 
 ## Usage
