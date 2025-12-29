@@ -1,12 +1,7 @@
-ThisBuild / git.baseVersion         := "0.1.0"
+import sbt.ThisBuild
+
 ThisBuild / organization            := "io.github.dkichler"
-ThisBuild / Compile / scalacOptions := List("-unchecked", "-deprecation", "-feature")
-ThisBuild / Test / scalacOptions    := List("-unchecked", "-deprecation", "-feature")
-ThisBuild / Compile / javacOptions  := List("--release", "17")
-ThisBuild / Test / javacOptions     := List("--release", "17")
-
-ThisBuild / scalaVersion := "2.13.18"
-
+ThisBuild / scalaVersion            := "2.13.18"
 
 ThisBuild / scmInfo                 := Option(
   ScmInfo(url("https://github.com/dkichler/config-record-factory"), "scm:git@github.com:dkichler/config-record-factory.git")
@@ -32,6 +27,10 @@ lazy val root = (project in file("."))
   .settings(osgiSettings)
   .settings(
     name                          := "config-record-factory",
+    Compile / scalacOptions       := List("-unchecked", "-deprecation", "-feature"),
+    Test / scalacOptions          := List("-unchecked", "-deprecation", "-feature"),
+    Compile / javacOptions        := List("--release", "17"),
+    Test / javacOptions           := List("--release", "17"),
     Compile / autoScalaLibrary    := false,
     Compile / crossPaths          := false,
     libraryDependencies           += "org.scala-lang" % "scala-library" % (ThisBuild / scalaVersion).value % Test,

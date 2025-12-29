@@ -22,7 +22,7 @@ import scala.reflect.{ClassTag, classTag}
 class ConfigRecordFactoryTest {
 
     @Test
-    def testCreate() {
+    def testCreate(): Unit = {
         val configIs: InputStream = this.getClass().getClassLoader().getResourceAsStream("recordconfig/recordconfig01.conf")
         val config: Config = ConfigFactory.parseReader(new InputStreamReader(configIs),
             ConfigParseOptions.defaults.setSyntax(ConfigSyntax.CONF)).resolve
@@ -33,7 +33,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testValidation() {
+    def testValidation(): Unit = {
         val configIs: InputStream = this.getClass().getClassLoader().getResourceAsStream("recordconfig/recordconfig01.conf")
         val config: Config = ConfigFactory.parseReader(new InputStreamReader(configIs),
             ConfigParseOptions.defaults.setSyntax(ConfigSyntax.CONF)).resolve.getConfig("validation")
@@ -64,7 +64,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testCreateBool() {
+    def testCreateBool(): Unit = {
         val recordConfig: BooleansConfig = ConfigRecordFactory.create(loadConfig().getConfig("booleans"), classOf[BooleansConfig])
         assertNotNull(recordConfig)
         assertEquals(true, recordConfig.trueVal)
@@ -72,7 +72,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testCreateString() {
+    def testCreateString(): Unit = {
         val recordConfig: StringsConfig = ConfigRecordFactory.create(loadConfig().getConfig("strings"), classOf[StringsConfig])
         assertNotNull(recordConfig)
         assertEquals("abcd", recordConfig.abcd)
@@ -80,7 +80,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testCreateEnum() {
+    def testCreateEnum(): Unit = {
         val recordConfig: EnumsConfig = ConfigRecordFactory.create(loadConfig().getConfig("enums"), classOf[EnumsConfig])
         assertNotNull(recordConfig)
         assertEquals(Problem.P1, recordConfig.problem)
@@ -88,7 +88,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testCreateNumber() {
+    def testCreateNumber(): Unit = {
         val recordConfig: NumbersConfig = ConfigRecordFactory.create(loadConfig().getConfig("numbers"), classOf[NumbersConfig])
         assertNotNull(recordConfig)
 
@@ -103,7 +103,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testCreateList() {
+    def testCreateList(): Unit = {
         val recordConfig: ArraysConfig = ConfigRecordFactory.create(loadConfig().getConfig("arrays"), classOf[ArraysConfig])
         assertNotNull(recordConfig)
         assertEquals(List().asJava, recordConfig.empty)
@@ -132,7 +132,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testCreateSet() {
+    def testCreateSet(): Unit = {
         val recordConfig: SetsConfig = ConfigRecordFactory.create(loadConfig().getConfig("sets"), classOf[SetsConfig])
         assertNotNull(recordConfig)
         assertEquals(Set().asJava, recordConfig.empty)
@@ -161,7 +161,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testCreateDuration() {
+    def testCreateDuration(): Unit = {
         val recordConfig: DurationsConfig = ConfigRecordFactory.create(loadConfig().getConfig("durations"), classOf[DurationsConfig])
         assertNotNull(recordConfig)
         assertEquals(Duration.ofMillis(500), recordConfig.halfSecond)
@@ -170,7 +170,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testCreateBytes() {
+    def testCreateBytes(): Unit = {
         val recordConfig: BytesConfig = ConfigRecordFactory.create(loadConfig().getConfig("bytes"), classOf[BytesConfig])
         assertNotNull(recordConfig)
         assertEquals(ConfigMemorySize.ofBytes(1024), recordConfig.kibibyte)
@@ -179,7 +179,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testPreferCamelNames() {
+    def testPreferCamelNames(): Unit = {
         val recordConfig = ConfigRecordFactory.create(loadConfig().getConfig("preferCamelNames"), classOf[PreferCamelNamesConfig])
         assertNotNull(recordConfig)
 
@@ -188,7 +188,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testValues() {
+    def testValues(): Unit = {
         val recordConfig = ConfigRecordFactory.create(loadConfig().getConfig("values"), classOf[ValuesConfig])
         assertNotNull(recordConfig)
         assertEquals(42, recordConfig.obj)
@@ -201,7 +201,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testOptionalProperties() {
+    def testOptionalProperties(): Unit = {
         val recordConfig: ObjectsConfig = ConfigRecordFactory.create(loadConfig().getConfig("objects"), classOf[ObjectsConfig])
         assertNotNull(recordConfig)
         assertNotNull(recordConfig.valueObject)
@@ -221,7 +221,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testNotABeanField() {
+    def testNotABeanField(): Unit = {
         val e = intercept[BadRecord] {
             ConfigRecordFactory.create(parseConfig("notBean=42"), classOf[NotABeanFieldConfig])
         }
@@ -230,7 +230,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testNotAnEnumField() {
+    def testNotAnEnumField(): Unit = {
         val e = intercept[ConfigException.BadValue] {
             ConfigRecordFactory.create(parseConfig("{problem=P1,solutions=[S4]}"), classOf[EnumsConfig])
         }
@@ -240,7 +240,7 @@ class ConfigRecordFactoryTest {
     }
 
     @Test
-    def testUnsupportedListElement() {
+    def testUnsupportedListElement(): Unit = {
         val e = intercept[ConfigRecordException.BadRecord] {
             ConfigRecordFactory.create(parseConfig("uri=[42]"), classOf[UnsupportedListElementConfig])
         }
@@ -388,7 +388,7 @@ class ConfigRecordFactoryTest {
     }
 
 
-    protected def checkValidationException(e: ConfigException.ValidationFailed, expecteds: Seq[Problem]) {
+    protected def checkValidationException(e: ConfigException.ValidationFailed, expecteds: Seq[Problem]): Unit = {
         val problems = e.problems().asScala.toIndexedSeq.sortBy(_.path).sortBy(_.origin.lineNumber)
 
         for ((problem, expected) <- problems zip expecteds) {
@@ -419,19 +419,19 @@ class ConfigRecordFactoryTest {
     }
 
     sealed abstract class Problem(path: String, line: Int) {
-        def check(p: ConfigException.ValidationProblem) {
+        def check(p: ConfigException.ValidationProblem): Unit = {
             assertEquals("matching path", path, p.path())
             assertEquals("matching line for " + path, line, p.origin().lineNumber())
         }
 
-        protected def assertMessage(p: ConfigException.ValidationProblem, re: String) {
+        protected def assertMessage(p: ConfigException.ValidationProblem, re: String): Unit = {
             assertTrue("didn't get expected message for " + path + ": got '" + p.problem() + "'",
                 p.problem().matches(re))
         }
     }
 
     case class Missing(path: String, line: Int, expected: String) extends Problem(path, line) {
-        override def check(p: ConfigException.ValidationProblem) {
+        override def check(p: ConfigException.ValidationProblem): Unit = {
             super.check(p)
             val re = "No setting.*" + path + ".*expecting.*" + expected + ".*"
             assertMessage(p, re)
@@ -439,7 +439,7 @@ class ConfigRecordFactoryTest {
     }
 
     case class WrongType(path: String, line: Int, expected: String, got: String) extends Problem(path, line) {
-        override def check(p: ConfigException.ValidationProblem) {
+        override def check(p: ConfigException.ValidationProblem): Unit = {
             super.check(p)
             val re = "Wrong value type.*" + path + ".*expecting.*" + expected + ".*got.*" + got + ".*"
             assertMessage(p, re)
