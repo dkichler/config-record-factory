@@ -1,6 +1,6 @@
 # config-record-factory
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.dkichler/config-record-factory/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.dkichler/config-record-factory)
+[![Maven Central](https://maven-badges.sml.io/maven-central/io.github.dkichler/config-record-factory/badge.svg)](https://maven-badges.sml.io/maven-central/io.github.dkichler/config-record-factory)
 [![Build Status](https://github.com/lightbend/config/actions/workflows/ci.yml/badge.svg)](https://github.com/dkichler/config-record-factory/actions/workflows/ci.yml)
 <a href="">![Coverage](https://gist.githubusercontent.com/dkichler/f4d7b3bb6eda2e6298814b449dec0bbb/raw/config-record-factory-coverage.svg)</a>
 
@@ -8,7 +8,7 @@ An extension to [Lightbend Config](https://github.com/lightbend/config) for supp
 
 ## Usage
 
-Add the dependency to a Maven (or favourite alternative) build. Latest version on [Maven Central](https://search.maven.org/artifact/io.github.dkichler/config-record-factory).
+Add the dependency to a Maven (or favourite alternative) build. Find the latest version on [Maven Central](https://search.maven.org/artifact/io.github.dkichler/config-record-factory).
 
 ```xml
 <dependency>
