@@ -35,7 +35,7 @@ lazy val root = (project in file("."))
     libraryDependencies           += "com.typesafe" % "config" % "1.4.5",
     libraryDependencies           += "com.github.sbt" % "junit-interface" % "0.13.3" % Test,
     pomIncludeRepository          := { _ => false },
-    OsgiKeys.exportPackage        := Seq("io.github.dkichler.config", "io.github.dkichler.config.impl"),
+    OsgiKeys.exportPackage        := Seq("io.github.dkichler.config", "com.typesafe.config.impl"),
     Compile / packageBin / packageOptions  +=
       Package.ManifestAttributes("Automatic-Module-Name" -> "io.github.dkichler.config" ),
 
