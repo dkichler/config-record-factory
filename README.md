@@ -14,7 +14,7 @@ Add the dependency to a Maven (or favourite alternative) build. Find the latest 
 <dependency>
     <groupId>io.github.dkichler</groupId>
     <artifactId>config-record-factory</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 </dependency>
 ```
 
